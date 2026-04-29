@@ -6,7 +6,12 @@ from django.core.exceptions import ValidationError
 class CustomUserCreationForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = User
-        fields = UserCreationForm.Meta.fields + ('email', 'phone_number',)
+        fields = UserCreationForm.Meta.fields + ('email', 'phone_number', 'role')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['email'].required = True
+        self.fields['role'].choices = [('Student', 'Student'), ('Organizer', 'Organizer')]
 
 class EventForm(forms.ModelForm):
     class Meta:

@@ -5,7 +5,10 @@ from . import views
 urlpatterns = [
     path('', views.home, name='home'),
     path('register/', views.register, name='register'),
-    path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
+    path('login/', auth_views.LoginView.as_view(template_name='registration/login.html', extra_context={'login_type': 'Student'}), name='login'),
+    path('login/student/', auth_views.LoginView.as_view(template_name='registration/login.html', extra_context={'login_type': 'Student'}), name='login_student'),
+    path('login/organizer/', auth_views.LoginView.as_view(template_name='registration/login.html', extra_context={'login_type': 'Organizer'}), name='login_organizer'),
+    path('login/admin/', auth_views.LoginView.as_view(template_name='registration/login.html', extra_context={'login_type': 'Admin'}), name='login_admin'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('events/', views.event_list, name='event_list'),
@@ -33,8 +36,8 @@ urlpatterns = [
     path('events/<int:event_id>/notifications/send/', views.send_notification, name='send_notification'),
     
     # Admin URLs
-    path('admin/users/', views.manage_users, name='manage_users'),
-    path('admin/users/<int:user_id>/toggle/', views.toggle_user_status, name='toggle_user_status'),
-    path('admin/users/<int:user_id>/role/', views.change_user_role, name='change_user_role'),
-    path('admin/events/', views.admin_events, name='admin_events'),
+    path('portal-admin/users/', views.manage_users, name='manage_users'),
+    path('portal-admin/users/<int:user_id>/toggle/', views.toggle_user_status, name='toggle_user_status'),
+    path('portal-admin/users/<int:user_id>/role/', views.change_user_role, name='change_user_role'),
+    path('portal-admin/events/', views.admin_events, name='admin_events'),
 ]

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Eventure - College Event Management{% endblock %}</title>
+    <title>{% block title %}MRCEW Events Portal{% endblock %}</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,7 +21,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
         <div class="container">
             <a class="navbar-brand" href="{% url 'home' %}">
-                <i class="bi bi-calendar2-event me-2"></i>Eventure
+                <i class="bi bi-bank me-2"></i>MRCEW Events
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -54,13 +54,13 @@
                         </li>
                     {% else %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'login' %}">Student Login</a>
+                            <a class="nav-link" href="{% url 'login_student' %}">Student Login</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'login' %}">Organizer Login</a>
+                            <a class="nav-link" href="{% url 'login_organizer' %}">Organizer Login</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link fw-bold text-warning" href="{% url 'login' %}">Admin Login</a>
+                            <a class="nav-link fw-bold text-warning" href="{% url 'login_admin' %}">Admin Login</a>
                         </li>
                         <li class="nav-item ms-lg-3">
                             <a class="btn btn-primary rounded-pill px-4 mt-2 mt-lg-0" href="{% url 'register' %}">Sign Up</a>
@@ -86,7 +86,7 @@
 
     <footer class="text-center text-secondary">
         <div class="container">
-            <p class="mb-0">&copy; {% now "Y" %} Eventure. All rights reserved.</p>
+            <p class="mb-0">&copy; {% now "Y" %} Malla Reddy College of Engineering for Women. All rights reserved.</p>
         </div>
     </footer>
 
