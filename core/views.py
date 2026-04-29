@@ -443,7 +443,7 @@ def send_notification(request, event_id):
 
 @login_required
 def manage_users(request):
-    if request.user.role != 'Admin':
+    if request.user.role != 'Admin' and not request.user.is_superuser:
         messages.error(request, "Access denied. Admins only.")
         return redirect('dashboard')
         
@@ -452,7 +452,7 @@ def manage_users(request):
 
 @login_required
 def toggle_user_status(request, user_id):
-    if request.user.role != 'Admin':
+    if request.user.role != 'Admin' and not request.user.is_superuser:
         return redirect('dashboard')
         
     if request.method == 'POST':
@@ -467,7 +467,7 @@ def toggle_user_status(request, user_id):
 
 @login_required
 def change_user_role(request, user_id):
-    if request.user.role != 'Admin':
+    if request.user.role != 'Admin' and not request.user.is_superuser:
         return redirect('dashboard')
         
     if request.method == 'POST':
@@ -482,7 +482,7 @@ def change_user_role(request, user_id):
 
 @login_required
 def admin_events(request):
-    if request.user.role != 'Admin':
+    if request.user.role != 'Admin' and not request.user.is_superuser:
         return redirect('dashboard')
         
     events = Event.objects.all().order_by('-date')

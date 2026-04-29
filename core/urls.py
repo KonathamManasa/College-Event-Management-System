@@ -37,8 +37,4 @@ urlpatterns = [
     path('admin/users/<int:user_id>/toggle/', views.toggle_user_status, name='toggle_user_status'),
     path('admin/users/<int:user_id>/role/', views.change_user_role, name='change_user_role'),
     path('admin/events/', views.admin_events, name='admin_events'),
-    
-    # Custom Login Endpoints
-    path('login/admin/', auth_views.LoginView.as_view(template_name='registration/login_admin.html'), name='admin_login'),
-    path('login/organizer/', auth_views.LoginView.as_view(template_name='registration/login_organizer.html'), name='organizer_login'),
 ]
