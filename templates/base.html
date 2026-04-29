@@ -47,14 +47,20 @@
                             <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
                         </li>
                         <li class="nav-item ms-lg-3">
-                            <form method="post" action="{% url 'logout' %}" class="d-inline">
+                            <form action="{% url 'logout' %}" method="post" class="d-inline">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-outline-primary btn-sm rounded-pill px-4">Logout</button>
+                                <button type="submit" class="btn btn-outline-danger rounded-pill px-4">Logout</button>
                             </form>
                         </li>
                     {% else %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'login' %}">Login</a>
+                            <a class="nav-link text-white" href="{% url 'login' %}">Student Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-info" href="{% url 'organizer_login' %}">Organizer Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-warning fw-bold" href="{% url 'admin_login' %}">Admin Login</a>
                         </li>
                         <li class="nav-item ms-lg-3">
                             <a class="btn btn-primary rounded-pill px-4" href="{% url 'register' %}">Sign Up</a>

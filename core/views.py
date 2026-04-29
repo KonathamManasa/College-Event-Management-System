@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from .forms import CustomUserCreationForm, EventForm, BudgetForm, ExpenseForm, VolunteerForm, SponsorForm, FeedbackForm, LostFoundForm
-from .models import Event, Registration, Certificate, Budget, Expense, Volunteer, Sponsor, Feedback, LostFoundItem, Notification
+from .models import User, Event, Registration, Certificate, Budget, Expense, Volunteer, Sponsor, Feedback, LostFoundItem, Notification
 from django.contrib import messages
 from django.http import HttpResponse, FileResponse
 from reportlab.pdfgen import canvas
@@ -33,8 +33,14 @@ def register(request):
 
 @login_required
 def dashboard(request):
-    if request.user.role == 'Admin':
-        return render(request, 'core/dashboard_admin.html')
+    if request.user.role == 'Admin' or request.user.is_superuser:
+        context = {
+            'total_users': User.objects.count(),
+            'total_events': Event.objects.count(),
+            'total_registrations': Registration.objects.count(),
+            'total_lost_found': LostFoundItem.objects.count()
+        }
+        return render(request, 'core/dashboard_admin.html', context)
     elif request.user.role == 'Organizer':
         return render(request, 'core/dashboard_organizer.html')
     else:
@@ -434,3 +440,50 @@ def send_notification(request, event_id):
                 )
             messages.success(request, f"Notification sent to {registrations.count()} attendees.")
     return redirect('event_detail', pk=event.pk)
+
+@login_required
+def manage_users(request):
+    if request.user.role != 'Admin':
+        messages.error(request, "Access denied. Admins only.")
+        return redirect('dashboard')
+        
+    users = User.objects.all().exclude(id=request.user.id).order_by('-date_joined')
+    return render(request, 'core/manage_users.html', {'users': users})
+
+@login_required
+def toggle_user_status(request, user_id):
+    if request.user.role != 'Admin':
+        return redirect('dashboard')
+        
+    if request.method == 'POST':
+        target_user = get_object_or_404(User, pk=user_id)
+        if not target_user.is_superuser:  # Prevent deactivating superusers
+            target_user.is_active = not target_user.is_active
+            target_user.save()
+            status = "activated" if target_user.is_active else "deactivated"
+            messages.success(request, f"User {target_user.username} successfully {status}.")
+            
+    return redirect('manage_users')
+
+@login_required
+def change_user_role(request, user_id):
+    if request.user.role != 'Admin':
+        return redirect('dashboard')
+        
+    if request.method == 'POST':
+        target_user = get_object_or_404(User, pk=user_id)
+        new_role = request.POST.get('role')
+        if new_role in dict(User.ROLE_CHOICES) and not target_user.is_superuser:
+            target_user.role = new_role
+            target_user.save()
+            messages.success(request, f"User {target_user.username}'s role changed to {new_role}.")
+            
+    return redirect('manage_users')
+
+@login_required
+def admin_events(request):
+    if request.user.role != 'Admin':
+        return redirect('dashboard')
+        
+    events = Event.objects.all().order_by('-date')
+    return render(request, 'core/admin_events.html', {'events': events})

@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}All Events - Admin{% endblock %}
+
+{% block content %}
+<div class="row mb-4 align-items-center">
+    <div class="col-md-8">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-2">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}" class="text-primary text-decoration-none">Dashboard</a></li>
+                <li class="breadcrumb-item active text-secondary" aria-current="page">All Events</li>
+            </ol>
+        </nav>
+        <h2 class="fw-bold mb-0">System Events</h2>
+    </div>
+</div>
+
+<div class="glass-card p-4">
+    <div class="table-responsive">
+        <table class="table table-dark table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Date</th>
+                    <th>Venue</th>
+                    <th>Organizer</th>
+                    <th>Registrations</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in events %}
+                <tr>
+                    <td>{{ event.title }}</td>
+                    <td>{{ event.date }}</td>
+                    <td>{{ event.venue }}</td>
+                    <td>{{ event.organizer.username }}</td>
+                    <td>{{ event.registrations.count }} / {{ event.capacity }}</td>
+                    <td>
+                        <a href="{% url 'event_detail' event.pk %}" class="btn btn-sm btn-outline-info me-1"><i class="bi bi-eye"></i></a>
+                        <a href="{% url 'event_update' event.pk %}" class="btn btn-sm btn-outline-warning me-1"><i class="bi bi-pencil"></i></a>
+                        <a href="{% url 'event_delete' event.pk %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-4 text-secondary">
+                        No events have been created yet.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
