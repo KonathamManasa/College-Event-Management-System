@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Attendees - {{ event.title }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4 align-items-center">
+    <div class="col-md-8">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-2">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}" class="text-primary text-decoration-none">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'event_detail' event.pk %}" class="text-primary text-decoration-none">{{ event.title }}</a></li>
+                <li class="breadcrumb-item active text-secondary" aria-current="page">Attendees</li>
+            </ol>
+        </nav>
+        <h2 class="fw-bold mb-0">Manage Attendees</h2>
+        <p class="text-secondary">Verify attendance for {{ event.title }}</p>
+    </div>
+</div>
+
+<div class="glass-card p-4">
+    <div class="table-responsive">
+        <table class="table table-dark table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Student Name</th>
+                    <th>Email</th>
+                    <th>Registration Date</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for reg in registrations %}
+                <tr>
+                    <td>{{ reg.student.get_full_name|default:reg.student.username }}</td>
+                    <td>{{ reg.student.email }}</td>
+                    <td>{{ reg.registration_date|date:"M d, Y H:i" }}</td>
+                    <td>
+                        {% if reg.attended %}
+                            <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Verified</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i>Pending</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if not reg.attended %}
+                        <form action="{% url 'verify_attendance' reg.pk %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-success rounded-pill"><i class="bi bi-check2-all me-1"></i>Mark Attended</button>
+                        </form>
+                        {% else %}
+                        <button class="btn btn-sm btn-outline-secondary rounded-pill" disabled>Already Verified</button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center py-4 text-secondary">
+                        No students have registered for this event yet.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

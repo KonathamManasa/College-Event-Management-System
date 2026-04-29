@@ -59,6 +59,7 @@
                             <td>
                                 <a href="{% url 'event_detail' event.pk %}" class="btn btn-sm btn-outline-info me-1"><i class="bi bi-eye"></i></a>
                                 <a href="{% url 'event_update' event.pk %}" class="btn btn-sm btn-outline-warning me-1"><i class="bi bi-pencil"></i></a>
+                                <a href="{% url 'manage_attendees' event.pk %}" class="btn btn-sm btn-outline-success me-1" title="Verify Attendance"><i class="bi bi-person-check"></i></a>
                                 <a href="{% url 'manage_budget' event.pk %}" class="btn btn-sm btn-outline-success me-1" title="Budget"><i class="bi bi-currency-dollar"></i></a>
                                 <a href="{% url 'manage_volunteers' event.pk %}" class="btn btn-sm btn-outline-primary me-1" title="Volunteers"><i class="bi bi-people"></i></a>
                                 <a href="{% url 'manage_sponsors' event.pk %}" class="btn btn-sm btn-outline-light me-1" title="Sponsors"><i class="bi bi-building"></i></a>

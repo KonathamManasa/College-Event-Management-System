@@ -10,6 +10,7 @@ from reportlab.lib.pagesizes import landscape, letter
 from reportlab.lib.units import inch
 from io import BytesIO
 from django.core.files.base import ContentFile
+import qrcode
 
 def home(request):
     return render(request, 'core/home.html')
@@ -147,6 +148,31 @@ def verify_attendance(request, reg_id):
     return render(request, 'core/verify_attendance.html', {'registration': registration})
 
 @login_required
+def self_check_in(request, event_id):
+    event = get_object_or_404(Event, pk=event_id)
+    
+    if request.user.role != 'Student':
+        messages.error(request, "Only students can check in to events.")
+        return redirect('dashboard')
+        
+    registration, created = Registration.objects.get_or_create(
+        student=request.user, 
+        event=event
+    )
+    
+    if not registration.attended:
+        registration.attended = True
+        registration.save()
+        if created:
+            messages.success(request, f"Successfully registered and checked in for {event.title}!")
+        else:
+            messages.success(request, f"Successfully checked in for {event.title}! You can now download your certificate.")
+    else:
+        messages.info(request, "You are already checked in for this event.")
+        
+    return redirect('dashboard')
+
+@login_required
 def generate_certificate(request, reg_id):
     registration = get_object_or_404(Registration, pk=reg_id, student=request.user)
     
@@ -276,6 +302,42 @@ def manage_volunteers(request, event_id):
         'volunteers': volunteers,
         'form': form
     })
+
+@login_required
+def manage_attendees(request, event_id):
+    event = get_object_or_404(Event, pk=event_id)
+    if request.user != event.organizer and request.user.role != 'Admin':
+        messages.error(request, "Permission denied.")
+        return redirect('dashboard')
+        
+    registrations = event.registrations.all().order_by('-registration_date')
+    
+    return render(request, 'core/manage_attendees.html', {
+        'event': event,
+        'registrations': registrations
+    })
+
+@login_required
+def event_qr_image(request, event_id):
+    from django.urls import reverse
+    event = get_object_or_404(Event, pk=event_id)
+    
+    # Generate the absolute URL so phones can open it
+    checkin_url = request.build_absolute_uri(reverse('self_check_in', args=[event.id]))
+    
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(checkin_url)
+    qr.make(fit=True)
+
+    img = qr.make_image(fill_color="black", back_color="white")
+    response = HttpResponse(content_type="image/png")
+    img.save(response, "PNG")
+    return response
 
 @login_required
 def add_volunteer(request, event_id):

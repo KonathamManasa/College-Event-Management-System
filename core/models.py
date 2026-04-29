@@ -31,10 +31,33 @@ class Event(models.Model):
     organizer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='events_organized')
     is_eco_friendly = models.BooleanField(default=False)
     image = models.ImageField(upload_to='event_images/', blank=True, null=True)
+    checkin_qr_code = models.ImageField(upload_to='event_checkin_qr/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+        
+        if is_new and not self.checkin_qr_code:
+            qr = qrcode.QRCode(
+                version=1,
+                error_correction=qrcode.constants.ERROR_CORRECT_L,
+                box_size=10,
+                border=4,
+            )
+            # URL for student self check-in
+            data = f"/events/{self.pk}/self-check-in/"
+            qr.add_data(data)
+            qr.make(fit=True)
+
+            img = qr.make_image(fill_color="black", back_color="white")
+            buffer = BytesIO()
+            img.save(buffer, format="PNG")
+            file_name = f"event_checkin_{self.id}.png"
+            self.checkin_qr_code.save(file_name, File(buffer), save=True)
 
 class Registration(models.Model):
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='registrations')
