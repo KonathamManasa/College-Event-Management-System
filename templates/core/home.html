@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="row align-items-center min-vh-75 py-5">
+    <div class="col-lg-6 mb-5 mb-lg-0 text-center text-lg-start">
+        <h1 class="display-3 fw-bold mb-4" style="background: linear-gradient(to right, #4f46e5, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            Elevate Your College Events
+        </h1>
+        <p class="lead text-secondary mb-5 fs-4">
+            The all-in-one platform to discover, register, and manage campus activities with ease.
+        </p>
+        <div class="d-flex flex-column flex-sm-row justify-content-center justify-content-lg-start gap-3">
+            <a href="{% url 'register' %}" class="btn btn-primary btn-lg rounded-pill px-5 py-3">Get Started</a>
+            <a href="#features" class="btn btn-outline-primary btn-lg rounded-pill px-5 py-3">Explore Features</a>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="glass-card p-4">
+            <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="College Events" class="img-fluid rounded-4 shadow-lg">
+        </div>
+    </div>
+</div>
+
+<div id="features" class="row mt-5 pt-5">
+    <div class="col-12 text-center mb-5">
+        <h2 class="display-5 fw-bold">Why Choose Eventure?</h2>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="glass-card p-4 h-100 text-center">
+            <div class="display-4 text-primary mb-3"><i class="bi bi-qr-code-scan"></i></div>
+            <h4 class="fw-bold mb-3">Seamless Entry</h4>
+            <p class="text-secondary">Quick check-ins with automated QR code generation and scanning.</p>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="glass-card p-4 h-100 text-center">
+            <div class="display-4 text-primary mb-3"><i class="bi bi-award"></i></div>
+            <h4 class="fw-bold mb-3">Auto Certificates</h4>
+            <p class="text-secondary">Receive beautifully designed certificates automatically upon event completion.</p>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="glass-card p-4 h-100 text-center">
+            <div class="display-4 text-primary mb-3"><i class="bi bi-calendar-check"></i></div>
+            <h4 class="fw-bold mb-3">Conflict-Free</h4>
+            <p class="text-secondary">Smart scheduling prevents venue and time overlaps automatically.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

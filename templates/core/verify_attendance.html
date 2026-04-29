@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Verify Attendance - Eventure{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-5">
+    <div class="col-md-8 col-lg-6">
+        <div class="glass-card p-4 p-md-5">
+            <div class="text-center mb-4">
+                <i class="bi bi-qr-code-scan display-1 text-primary"></i>
+                <h2 class="fw-bold mt-3 text-white">Verify Attendance</h2>
+                <p class="text-secondary">Scan result for registration ID: {{ registration.pk }}</p>
+            </div>
+            
+            <div class="card bg-dark border-secondary border-opacity-25 mb-4">
+                <div class="card-body">
+                    <h5 class="card-title text-primary border-bottom border-secondary border-opacity-25 pb-2 mb-3">Event Details</h5>
+                    <p class="card-text mb-1"><strong class="text-white">Event:</strong> {{ registration.event.title }}</p>
+                    <p class="card-text mb-1"><strong class="text-white">Date:</strong> {{ registration.event.date }}</p>
+                    <p class="card-text"><strong class="text-white">Venue:</strong> {{ registration.event.venue }}</p>
+                    
+                    <h5 class="card-title text-primary border-bottom border-secondary border-opacity-25 pb-2 mb-3 mt-4">Student Details</h5>
+                    <p class="card-text mb-1"><strong class="text-white">Name:</strong> {{ registration.student.get_full_name|default:registration.student.username }}</p>
+                    <p class="card-text"><strong class="text-white">Status:</strong> 
+                        {% if registration.attended %}
+                            <span class="badge bg-success">Already Verified</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark">Not Verified</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            
+            {% if not registration.attended %}
+            <form method="post">
+                {% csrf_token %}
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-success btn-lg rounded-pill"><i class="bi bi-check-circle me-2"></i>Mark as Attended</button>
+                    <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary rounded-pill mt-2">Cancel</a>
+                </div>
+            </form>
+            {% else %}
+            <div class="alert alert-info border-info bg-info bg-opacity-10 text-info">
+                <i class="bi bi-info-circle me-2"></i> This student's attendance has already been verified.
+            </div>
+            <div class="d-grid mt-3">
+                <a href="{% url 'dashboard' %}" class="btn btn-outline-primary rounded-pill">Back to Dashboard</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Manage Volunteers - {{ event.title }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4 align-items-center">
+    <div class="col-md-8">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-2">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}" class="text-primary text-decoration-none">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'event_detail' event.pk %}" class="text-primary text-decoration-none">{{ event.title }}</a></li>
+                <li class="breadcrumb-item active text-secondary" aria-current="page">Volunteers</li>
+            </ol>
+        </nav>
+        <h2 class="fw-bold mb-0">Volunteer Management</h2>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mb-4">
+        <div class="glass-card p-4 h-100">
+            <h4 class="fw-bold mb-4">Assigned Volunteers</h4>
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Role / Responsibilities</th>
+                            <th class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for vol in volunteers %}
+                        <tr>
+                            <td>{{ vol.student.get_full_name|default:vol.student.username }}</td>
+                            <td>{{ vol.role_description }}</td>
+                            <td class="text-end">
+                                <form action="{% url 'delete_volunteer' vol.id %}" method="post" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-danger border-0"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center py-4 text-secondary">
+                                No volunteers assigned yet.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4 mb-4">
+        <div class="glass-card p-4 h-100">
+            <h4 class="fw-bold mb-4">Add Volunteer</h4>
+            <form action="{% url 'add_volunteer' event.id %}" method="post">
+                {% csrf_token %}
+                {{ form|crispy }}
+                <div class="d-grid mt-3">
+                    <button type="submit" class="btn btn-primary rounded-pill"><i class="bi bi-person-plus me-2"></i>Assign</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

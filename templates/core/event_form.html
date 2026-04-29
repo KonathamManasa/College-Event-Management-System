@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ title }} - Eventure{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+    <div class="col-md-10 col-lg-8">
+        <div class="glass-card p-4 p-md-5">
+            <div class="d-flex justify-content-between align-items-center mb-4 border-bottom border-secondary border-opacity-25 pb-3">
+                <h2 class="fw-bold mb-0 text-white">{{ title }}</h2>
+                <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary btn-sm rounded-pill">Cancel</a>
+            </div>
+            
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-12 mb-3">
+                        {{ form.title|as_crispy_field }}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        {{ form.date|as_crispy_field }}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        {{ form.start_time|as_crispy_field }}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        {{ form.end_time|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ form.venue|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ form.category|as_crispy_field }}
+                    </div>
+                    <div class="col-12 mb-3">
+                        {{ form.description|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ form.image|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6 mb-3 d-flex align-items-center mt-md-4 pt-md-2">
+                        {{ form.is_eco_friendly|as_crispy_field }}
+                    </div>
+                </div>
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg rounded-pill">Save Event</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

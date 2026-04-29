@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}Lost & Found - Eventure{% endblock %}
+
+{% block content %}
+<div class="row mb-4 align-items-center">
+    <div class="col-md-8">
+        <h2 class="fw-bold mb-0">Lost & Found Board</h2>
+        <p class="text-secondary">Report lost items or post found items</p>
+    </div>
+    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <a href="{% url 'post_lost_found' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-2"></i>Post Item</a>
+    </div>
+</div>
+
+<div class="row g-4">
+    {% for item in items %}
+    <div class="col-md-6 col-lg-4">
+        <div class="glass-card h-100 d-flex flex-column">
+            {% if item.image %}
+                <img src="{{ item.image.url }}" class="card-img-top object-fit-cover rounded-top" alt="{{ item.name }}" style="height: 200px;">
+            {% else %}
+                <div class="bg-secondary bg-opacity-25 d-flex align-items-center justify-content-center rounded-top" style="height: 200px;">
+                    <i class="bi bi-box-seam display-3 text-secondary"></i>
+                </div>
+            {% endif %}
+            
+            <div class="p-4 d-flex flex-column flex-grow-1">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h5 class="fw-bold text-white mb-0">{{ item.name }}</h5>
+                    {% if item.status == 'Lost' %}
+                        <span class="badge bg-danger rounded-pill">Lost</span>
+                    {% elif item.status == 'Found' %}
+                        <span class="badge bg-success rounded-pill">Found</span>
+                    {% else %}
+                        <span class="badge bg-secondary rounded-pill">Claimed</span>
+                    {% endif %}
+                </div>
+                
+                <p class="text-secondary small mb-2"><i class="bi bi-calendar3 me-2"></i>Reported: {{ item.date_reported|date:"M d, Y" }}</p>
+                <p class="text-secondary small mb-3"><i class="bi bi-person me-2"></i>By: {{ item.reported_by.get_full_name|default:item.reported_by.username }}</p>
+                
+                <p class="text-white">{{ item.description }}</p>
+                
+                {% if user == item.reported_by or user.role == 'Admin' %}
+                <div class="mt-auto pt-3 border-top border-secondary border-opacity-25">
+                    <form action="{% url 'update_lost_found_status' item.id %}" method="post" class="d-flex gap-2">
+                        {% csrf_token %}
+                        <select name="status" class="form-select form-select-sm bg-dark text-white border-secondary">
+                            <option value="Lost" {% if item.status == 'Lost' %}selected{% endif %}>Lost</option>
+                            <option value="Found" {% if item.status == 'Found' %}selected{% endif %}>Found</option>
+                            <option value="Claimed" {% if item.status == 'Claimed' %}selected{% endif %}>Claimed</option>
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-outline-primary">Update</button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center py-5 glass-card">
+        <i class="bi bi-search display-1 text-secondary mb-3 d-block"></i>
+        <h3 class="text-white">No items reported</h3>
+        <p class="text-secondary">The lost and found board is currently empty.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}Organizer Dashboard - Eventure{% endblock %}
+
+{% block content %}
+<div class="row mb-4 align-items-center">
+    <div class="col-md-8">
+        <h2 class="fw-bold mb-0">Organizer Dashboard</h2>
+        <p class="text-secondary">Manage your events and attendees</p>
+    </div>
+    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <a href="{% url 'event_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-2"></i>Create Event</a>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="glass-card stat-card h-100">
+            <h5 class="text-secondary">My Events</h5>
+            <h3>{{ user.events_organized.count }}</h3>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="glass-card stat-card h-100">
+            <h5 class="text-secondary">Total Attendees</h5>
+            <h3>0</h3>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="glass-card stat-card h-100">
+            <h5 class="text-secondary">Avg. Rating</h5>
+            <h3>0.0 <i class="bi bi-star-fill text-warning fs-5"></i></h3>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="glass-card p-4">
+            <h4 class="fw-bold mb-4">Managed Events</h4>
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Date & Time</th>
+                            <th>Venue</th>
+                            <th>Attendees</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for event in user.events_organized.all %}
+                        <tr>
+                            <td>{{ event.title }}</td>
+                            <td>{{ event.date }} <br> <small class="text-secondary">{{ event.start_time|time:"g:i A" }}</small></td>
+                            <td>{{ event.venue }}</td>
+                            <td>{{ event.registrations.count }}</td>
+                            <td>
+                                <a href="{% url 'event_detail' event.pk %}" class="btn btn-sm btn-outline-info me-1"><i class="bi bi-eye"></i></a>
+                                <a href="{% url 'event_update' event.pk %}" class="btn btn-sm btn-outline-warning me-1"><i class="bi bi-pencil"></i></a>
+                                <a href="{% url 'manage_budget' event.pk %}" class="btn btn-sm btn-outline-success me-1" title="Budget"><i class="bi bi-currency-dollar"></i></a>
+                                <a href="{% url 'manage_volunteers' event.pk %}" class="btn btn-sm btn-outline-primary me-1" title="Volunteers"><i class="bi bi-people"></i></a>
+                                <a href="{% url 'manage_sponsors' event.pk %}" class="btn btn-sm btn-outline-light me-1" title="Sponsors"><i class="bi bi-building"></i></a>
+                                <a href="{% url 'event_delete' event.pk %}" class="btn btn-sm btn-outline-danger" title="Delete"><i class="bi bi-trash"></i></a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-4">
+                                <p class="text-secondary mb-0">You haven't created any events yet.</p>
+                                <a href="{% url 'event_create' %}" class="btn btn-outline-primary btn-sm mt-2">Create Your First Event</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

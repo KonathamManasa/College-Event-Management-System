@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Manage Sponsors - {{ event.title }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4 align-items-center">
+    <div class="col-md-8">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-2">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}" class="text-primary text-decoration-none">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'event_detail' event.pk %}" class="text-primary text-decoration-none">{{ event.title }}</a></li>
+                <li class="breadcrumb-item active text-secondary" aria-current="page">Sponsors</li>
+            </ol>
+        </nav>
+        <h2 class="fw-bold mb-0">Sponsor Management</h2>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mb-4">
+        <div class="glass-card p-4 h-100">
+            <h4 class="fw-bold mb-4">Current Sponsors</h4>
+            <div class="row g-3">
+                {% for sponsor in sponsors %}
+                <div class="col-md-6">
+                    <div class="card bg-dark border-secondary border-opacity-25 h-100">
+                        <div class="card-body d-flex align-items-center">
+                            {% if sponsor.logo %}
+                                <img src="{{ sponsor.logo.url }}" class="rounded me-3 object-fit-contain bg-white p-1" style="width: 60px; height: 60px;" alt="{{ sponsor.name }}">
+                            {% else %}
+                                <div class="bg-secondary rounded me-3 d-flex align-items-center justify-content-center text-white" style="width: 60px; height: 60px;">
+                                    <i class="bi bi-building"></i>
+                                </div>
+                            {% endif %}
+                            <div class="flex-grow-1">
+                                <h5 class="card-title mb-1 text-white">{{ sponsor.name }}</h5>
+                                {% if sponsor.amount_contributed %}
+                                <p class="card-text text-success mb-0">${{ sponsor.amount_contributed|floatformat:2 }}</p>
+                                {% endif %}
+                            </div>
+                            <form action="{% url 'delete_sponsor' sponsor.id %}" method="post" class="ms-2">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger border-0"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12 text-center py-4 text-secondary">
+                    No sponsors added yet.
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4 mb-4">
+        <div class="glass-card p-4 h-100">
+            <h4 class="fw-bold mb-4">Add Sponsor</h4>
+            <form action="{% url 'add_sponsor' event.id %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form|crispy }}
+                <div class="d-grid mt-3">
+                    <button type="submit" class="btn btn-primary rounded-pill"><i class="bi bi-plus-lg me-2"></i>Add Sponsor</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

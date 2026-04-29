@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Dashboard - Eventure{% endblock %}
+
+{% block content %}
+<div class="row mb-4 align-items-center">
+    <div class="col-md-8">
+        <h2 class="fw-bold mb-0">Student Dashboard</h2>
+        <p class="text-secondary">Welcome back, {{ user.first_name|default:user.username }}!</p>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="glass-card stat-card h-100">
+            <h5 class="text-secondary">Registered Events</h5>
+            <h3>{{ user.registrations.count }}</h3>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="glass-card stat-card h-100">
+            <h5 class="text-secondary">Upcoming Events</h5>
+            <h3>{{ user.registrations.filter.event.date__gte|default:0 }}</h3>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="glass-card stat-card h-100">
+            <h5 class="text-secondary">Certificates</h5>
+            <h3>0</h3>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="glass-card p-4">
+            <h4 class="fw-bold mb-4">My Events</h4>
+            <div class="row g-4">
+                {% for registration in user.registrations.all %}
+                <div class="col-md-6 col-xl-4">
+                    <div class="glass-card h-100 d-flex flex-column p-3">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h5 class="fw-bold mb-0">{{ registration.event.title }}</h5>
+                            {% if registration.attended %}
+                                <span class="badge bg-success rounded-pill">Attended</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark rounded-pill">Registered</span>
+                            {% endif %}
+                        </div>
+                        <div class="text-secondary small mb-2"><i class="bi bi-calendar3 me-2"></i>{{ registration.event.date }}</div>
+                        <div class="text-secondary small mb-3"><i class="bi bi-geo-alt me-2"></i>{{ registration.event.venue }}</div>
+                        
+                        <div class="mt-auto text-center p-3 bg-white rounded-3 shadow-sm mx-auto" style="width: 150px; height: 150px;">
+                            {% if registration.qr_code %}
+                                <img src="{{ registration.qr_code.url }}" class="img-fluid w-100 h-100 object-fit-contain" alt="QR Code">
+                            {% else %}
+                                <div class="d-flex align-items-center justify-content-center h-100 text-muted small">No QR</div>
+                            {% endif %}
+                        </div>
+                        {% if registration.attended %}
+                            <div class="mt-3">
+                                <a href="{% url 'generate_certificate' registration.pk %}" class="btn btn-outline-success btn-sm w-100 rounded-pill mb-2"><i class="bi bi-download me-2"></i>Certificate</a>
+                                <a href="{% url 'add_feedback' registration.event.pk %}" class="btn btn-outline-warning btn-sm w-100 rounded-pill"><i class="bi bi-star me-2"></i>Feedback</a>
+                            </div>
+                        {% else %}
+                            <p class="text-center small text-secondary mt-2 mb-0">Show this QR code at entry</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12 text-center text-secondary py-5">
+                    <i class="bi bi-calendar-x display-1 mb-3 d-block"></i>
+                    <p>You haven't registered for any events yet.</p>
+                    <a href="{% url 'event_list' %}" class="btn btn-primary mt-2">Browse Events</a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Manage Budget - {{ event.title }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4 align-items-center">
+    <div class="col-md-8">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-2">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}" class="text-primary text-decoration-none">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'event_detail' event.pk %}" class="text-primary text-decoration-none">{{ event.title }}</a></li>
+                <li class="breadcrumb-item active text-secondary" aria-current="page">Budget</li>
+            </ol>
+        </nav>
+        <h2 class="fw-bold mb-0">Budget Management</h2>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="glass-card stat-card h-100 border-primary border-opacity-25">
+            <h5 class="text-secondary">Total Budget</h5>
+            <h3 class="text-white">${{ budget.total_budget|floatformat:2 }}</h3>
+            <button type="button" class="btn btn-sm btn-outline-primary mt-2 rounded-pill" data-bs-toggle="modal" data-bs-target="#budgetModal">
+                Update Budget
+            </button>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="glass-card stat-card h-100 border-danger border-opacity-25">
+            <h5 class="text-secondary">Amount Spent</h5>
+            <h3 class="text-danger">${{ budget.amount_spent|floatformat:2 }}</h3>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="glass-card stat-card h-100 border-success border-opacity-25">
+            <h5 class="text-secondary">Remaining Balance</h5>
+            <h3 class="text-success">${{ budget.remaining_balance|floatformat:2 }}</h3>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mb-4">
+        <div class="glass-card p-4 h-100">
+            <h4 class="fw-bold mb-4">Expense History</h4>
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Amount</th>
+                            <th class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for expense in expenses %}
+                        <tr>
+                            <td>{{ expense.date|date:"M d, Y" }}</td>
+                            <td>{{ expense.description }}</td>
+                            <td class="text-danger">-${{ expense.amount|floatformat:2 }}</td>
+                            <td class="text-end">
+                                <form action="{% url 'delete_expense' expense.id %}" method="post" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-danger border-0"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center py-4 text-secondary">
+                                No expenses recorded yet.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4 mb-4">
+        <div class="glass-card p-4 h-100">
+            <h4 class="fw-bold mb-4">Add Expense</h4>
+            <form action="{% url 'add_expense' budget.id %}" method="post">
+                {% csrf_token %}
+                {{ expense_form|crispy }}
+                <div class="d-grid mt-3">
+                    <button type="submit" class="btn btn-primary rounded-pill"><i class="bi bi-plus-lg me-2"></i>Add Expense</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Budget Modal -->
+<div class="modal fade" id="budgetModal" tabindex="-1" aria-labelledby="budgetModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark border-secondary">
+            <div class="modal-header border-secondary border-opacity-25">
+                <h5 class="modal-title text-white" id="budgetModalLabel">Update Total Budget</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <input type="hidden" name="update_budget" value="1">
+                    {{ budget_form|crispy }}
+                </div>
+                <div class="modal-footer border-secondary border-opacity-25">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary rounded-pill">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

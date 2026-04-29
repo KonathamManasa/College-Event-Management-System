@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Register - Eventure{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center py-5">
+    <div class="col-md-8 col-lg-6">
+        <div class="glass-card p-5">
+            <div class="text-center mb-4">
+                <h2 class="fw-bold mb-2">Create an Account</h2>
+                <p class="text-secondary">Join Eventure and start discovering events</p>
+            </div>
+            
+            <form method="post">
+                {% csrf_token %}
+                {{ form|crispy }}
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">Sign Up</button>
+                </div>
+            </form>
+            
+            <div class="text-center mt-4">
+                <p class="text-secondary mb-0">Already have an account? <a href="{% url 'login' %}" class="text-primary text-decoration-none">Login</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
