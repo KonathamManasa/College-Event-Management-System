@@ -23,13 +23,13 @@
     <div class="col-md-4 mb-3">
         <div class="glass-card stat-card h-100">
             <h5 class="text-secondary">Total Attendees</h5>
-            <h3>0</h3>
+            <h3>{{ total_attendees }}</h3>
         </div>
     </div>
     <div class="col-md-4 mb-3">
         <div class="glass-card stat-card h-100">
             <h5 class="text-secondary">Avg. Rating</h5>
-            <h3>0.0 <i class="bi bi-star-fill text-warning fs-5"></i></h3>
+            <h3>{{ avg_rating }} <i class="bi bi-star-fill text-warning fs-5"></i></h3>
         </div>
     </div>
 </div>
@@ -46,16 +46,18 @@
                             <th>Date & Time</th>
                             <th>Venue</th>
                             <th>Attendees</th>
+                            <th>Rating</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for event in user.events_organized.all %}
+                        {% for event in managed_events %}
                         <tr>
                             <td>{{ event.title }}</td>
                             <td>{{ event.date }} <br> <small class="text-secondary">{{ event.start_time|time:"g:i A" }}</small></td>
                             <td>{{ event.venue }}</td>
                             <td>{{ event.registrations.count }}</td>
+                            <td>{{ event.event_avg_rating|floatformat:1|default:"-" }} <i class="bi bi-star-fill text-warning"></i></td>
                             <td>
                                 <a href="{% url 'event_detail' event.pk %}" class="btn btn-sm btn-outline-info me-1"><i class="bi bi-eye"></i></a>
                                 <a href="{% url 'event_update' event.pk %}" class="btn btn-sm btn-outline-warning me-1"><i class="bi bi-pencil"></i></a>
@@ -68,7 +70,7 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="5" class="text-center py-4">
+                            <td colspan="6" class="text-center py-4">
                                 <p class="text-secondary mb-0">You haven't created any events yet.</p>
                                 <a href="{% url 'event_create' %}" class="btn btn-outline-primary btn-sm mt-2">Create Your First Event</a>
                             </td>

@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import User, Event, Budget, Expense, Volunteer, Sponsor, Feedback, LostFoundItem
+from .models import User, Event, Budget, Expense, Volunteer, Sponsor, Feedback, LostFoundItem, EventPhoto
 from django.core.exceptions import ValidationError
 
 class CustomUserCreationForm(UserCreationForm):
@@ -93,3 +93,8 @@ class LostFoundForm(forms.ModelForm):
         widgets = {
             'description': forms.Textarea(attrs={'rows': 4}),
         }
+
+class EventPhotoForm(forms.ModelForm):
+    class Meta:
+        model = EventPhoto
+        fields = ['image', 'caption']

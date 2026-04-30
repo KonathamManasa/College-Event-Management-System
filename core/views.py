@@ -1,9 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
-from .forms import CustomUserCreationForm, EventForm, BudgetForm, ExpenseForm, VolunteerForm, SponsorForm, FeedbackForm, LostFoundForm
-from .models import User, Event, Registration, Certificate, Budget, Expense, Volunteer, Sponsor, Feedback, LostFoundItem, Notification
+from .forms import CustomUserCreationForm, EventForm, BudgetForm, ExpenseForm, VolunteerForm, SponsorForm, FeedbackForm, LostFoundForm, EventPhotoForm
+from .models import User, Event, Registration, Certificate, Budget, Expense, Volunteer, Sponsor, Feedback, LostFoundItem, Notification, EventPhoto
 from django.contrib import messages
+from django.core.mail import send_mail
+from django.conf import settings
 from django.http import HttpResponse, FileResponse
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import landscape, letter
@@ -11,9 +13,17 @@ from reportlab.lib.units import inch
 from io import BytesIO
 from django.core.files.base import ContentFile
 import qrcode
+import zipfile
+import os
+from django.db.models import Avg
+
+from django.utils import timezone
 
 def home(request):
-    return render(request, 'core/home.html')
+    now = timezone.now().date()
+    # Find the next upcoming event
+    next_event = Event.objects.filter(date__gte=now).order_by('date', 'start_time').first()
+    return render(request, 'core/home.html', {'next_event': next_event})
 
 def register(request):
     if request.user.is_authenticated:
@@ -43,9 +53,29 @@ def dashboard(request):
         }
         return render(request, 'core/dashboard_admin.html', context)
     elif request.user.role == 'Organizer':
-        return render(request, 'core/dashboard_organizer.html')
+        events = request.user.events_organized.all()
+        total_attendees = sum(event.registrations.count() for event in events)
+        feedbacks = Feedback.objects.filter(event__organizer=request.user)
+        overall_avg_rating = sum(f.rating for f in feedbacks) / feedbacks.count() if feedbacks.count() > 0 else 0
+        
+        managed_events = events.annotate(event_avg_rating=Avg('feedbacks__rating'))
+        
+        context = {
+            'total_attendees': total_attendees,
+            'avg_rating': round(overall_avg_rating, 1),
+            'managed_events': managed_events
+        }
+        return render(request, 'core/dashboard_organizer.html', context)
     else:
-        return render(request, 'core/dashboard_student.html')
+        from django.utils import timezone
+        now = timezone.now().date()
+        upcoming_events_count = request.user.registrations.filter(event__date__gte=now).count()
+        certificates_count = Certificate.objects.filter(registration__student=request.user).count()
+        context = {
+            'upcoming_events_count': upcoming_events_count,
+            'certificates_count': certificates_count
+        }
+        return render(request, 'core/dashboard_student.html', context)
 
 def event_list(request):
     events = Event.objects.all().order_by('date', 'start_time')
@@ -123,6 +153,21 @@ def event_register(request, pk):
         else:
             Registration.objects.create(student=request.user, event=event)
             messages.success(request, f"Successfully registered for {event.title}! Check your dashboard for the QR code.")
+            
+            # Send Email Notification
+            subject = f"Registration Successful: {event.title}"
+            message = f"Hi {request.user.username},\n\nYou have successfully registered for {event.title} happening on {event.date} at {event.start_time}.\n\nVenue: {event.venue}\n\nThank you!"
+            try:
+                send_mail(
+                    subject,
+                    message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [request.user.email],
+                    fail_silently=True,
+                )
+            except Exception as e:
+                # Log or ignore error in case of console failure
+                pass
             
     return redirect('event_detail', pk=pk)
 
@@ -549,3 +594,77 @@ def admin_events(request):
         
     events = Event.objects.all().order_by('-date')
     return render(request, 'core/admin_events.html', {'events': events})
+
+def event_gallery(request):
+    photos = EventPhoto.objects.all().order_by('-uploaded_at')
+    
+    # Filter by Year
+    year = request.GET.get('year')
+    if year:
+        photos = photos.filter(event__date__year=year)
+        
+    # Filter by Category
+    category = request.GET.get('category')
+    if category:
+        photos = photos.filter(event__category__icontains=category)
+        
+    # Filter by Event Name
+    event_name = request.GET.get('event_name')
+    if event_name:
+        photos = photos.filter(event__title__icontains=event_name)
+        
+    # Get unique years and categories for dropdowns
+    years = Event.objects.dates('date', 'year').distinct()
+    categories = Event.objects.values_list('category', flat=True).distinct()
+    events = Event.objects.all().order_by('-date')
+    
+    context = {
+        'photos': photos,
+        'years': years,
+        'categories': categories,
+        'events': events,
+        'selected_year': year,
+        'selected_category': category,
+        'selected_event': event_name
+    }
+    return render(request, 'core/gallery.html', context)
+
+@login_required
+def upload_photo(request, event_id):
+    event = get_object_or_404(Event, pk=event_id)
+    if request.user != event.organizer and request.user.role != 'Admin':
+        messages.error(request, "Permission denied.")
+        return redirect('dashboard')
+        
+    if request.method == 'POST':
+        form = EventPhotoForm(request.POST, request.FILES)
+        if form.is_valid():
+            photo = form.save(commit=False)
+            photo.event = event
+            photo.save()
+            messages.success(request, "Photo uploaded successfully!")
+            return redirect('event_detail', pk=event.pk)
+    else:
+        form = EventPhotoForm()
+        
+    return render(request, 'core/upload_photo.html', {'form': form, 'event': event})
+
+def download_album(request, event_id):
+    event = get_object_or_404(Event, pk=event_id)
+    photos = event.photos.all()
+    
+    if not photos.exists():
+        messages.info(request, "No photos available for download.")
+        return redirect('event_detail', pk=event.pk)
+        
+    buffer = BytesIO()
+    with zipfile.ZipFile(buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+        for photo in photos:
+            if photo.image:
+                file_path = photo.image.path
+                file_name = os.path.basename(file_path)
+                zip_file.write(file_path, file_name)
+                
+    buffer.seek(0)
+    response = FileResponse(buffer, as_attachment=True, filename=f"{event.title}_Album.zip")
+    return response

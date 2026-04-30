@@ -50,6 +50,36 @@
                 
                 <h1 class="fw-bold text-white mb-4">{{ event.title }}</h1>
                 
+                <div class="mb-4 pb-4 border-bottom border-secondary border-opacity-25 text-center" id="event-countdown-container">
+                    <h5 class="text-secondary mb-3 fw-bold tracking-wider text-uppercase small">Time Until Event Starts</h5>
+                    <div class="d-flex justify-content-center gap-2 gap-md-3" id="event-countdown" data-date="{{ event.date|date:'Y-m-d' }}T{{ event.start_time|time:'H:i:s' }}">
+                        <div class="text-center">
+                            <div class="bg-dark text-primary rounded-4 p-2 shadow-sm border border-primary border-opacity-25" style="min-width: 65px;">
+                                <h3 class="fw-bold mb-0" id="ev-days">00</h3>
+                            </div>
+                            <span class="text-secondary small fw-bold mt-1 d-block text-uppercase" style="font-size: 0.7rem;">Days</span>
+                        </div>
+                        <div class="text-center">
+                            <div class="bg-dark text-primary rounded-4 p-2 shadow-sm border border-primary border-opacity-25" style="min-width: 65px;">
+                                <h3 class="fw-bold mb-0" id="ev-hours">00</h3>
+                            </div>
+                            <span class="text-secondary small fw-bold mt-1 d-block text-uppercase" style="font-size: 0.7rem;">Hrs</span>
+                        </div>
+                        <div class="text-center">
+                            <div class="bg-dark text-primary rounded-4 p-2 shadow-sm border border-primary border-opacity-25" style="min-width: 65px;">
+                                <h3 class="fw-bold mb-0" id="ev-minutes">00</h3>
+                            </div>
+                            <span class="text-secondary small fw-bold mt-1 d-block text-uppercase" style="font-size: 0.7rem;">Mins</span>
+                        </div>
+                        <div class="text-center">
+                            <div class="bg-dark text-primary rounded-4 p-2 shadow-sm border border-primary border-opacity-25" style="min-width: 65px;">
+                                <h3 class="fw-bold mb-0" id="ev-seconds">00</h3>
+                            </div>
+                            <span class="text-secondary small fw-bold mt-1 d-block text-uppercase" style="font-size: 0.7rem;">Secs</span>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="row g-4 mb-4 pb-4 border-bottom border-secondary border-opacity-25">
                     <div class="col-sm-6">
                         <div class="d-flex align-items-center">
@@ -152,6 +182,7 @@
                     <button type="button" class="btn btn-warning rounded-pill" data-bs-toggle="modal" data-bs-target="#notificationModal">
                         <i class="bi bi-bell-fill me-2"></i>Send Alert to Attendees
                     </button>
+                    <a href="{% url 'upload_photo' event.pk %}" class="btn btn-outline-primary rounded-pill"><i class="bi bi-camera me-2"></i>Upload Photo</a>
                     <a href="{% url 'manage_attendees' event.pk %}" class="btn btn-outline-info rounded-pill"><i class="bi bi-person-check me-2"></i>Manage Attendees</a>
                     <a href="{% url 'manage_budget' event.pk %}" class="btn btn-outline-success rounded-pill"><i class="bi bi-currency-dollar me-2"></i>Manage Budget</a>
                     <a href="{% url 'manage_volunteers' event.pk %}" class="btn btn-outline-primary rounded-pill"><i class="bi bi-people me-2"></i>Manage Volunteers</a>
@@ -192,10 +223,20 @@
             <hr class="border-secondary border-opacity-25 my-4">
             
             <h5 class="fw-bold mb-3">Event Stats</h5>
-            <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="d-flex justify-content-between align-items-center mb-4">
                 <span class="text-secondary">Registered Attendees</span>
                 <span class="fw-bold fs-5 text-white">{{ event.registrations.count }}</span>
             </div>
+            
+            {% if event.photos.exists %}
+            <hr class="border-secondary border-opacity-25 my-4">
+            <h5 class="fw-bold mb-3">Memories</h5>
+            <div class="d-grid gap-2">
+                <a href="{% url 'download_album' event.pk %}" class="btn btn-outline-light rounded-pill">
+                    <i class="bi bi-file-earmark-zip me-2"></i>Download Photo Album
+                </a>
+            </div>
+            {% endif %}
             
         </div>
     </div>
@@ -227,4 +268,36 @@
     </div>
 </div>
 {% endif %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const countdownElement = document.getElementById('event-countdown');
+    if (!countdownElement) return;
+
+    const targetDateStr = countdownElement.getAttribute('data-date');
+    const targetDate = new Date(targetDateStr).getTime();
+
+    function updateCountdown() {
+        const now = new Date().getTime();
+        const distance = targetDate - now;
+
+        if (distance < 0) {
+            document.getElementById('event-countdown-container').innerHTML = '<div class="alert alert-success fw-bold text-center mb-0"><i class="bi bi-check-circle-fill me-2"></i>This event has already started!</div>';
+            return;
+        }
+
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        document.getElementById('ev-days').innerText = days.toString().padStart(2, '0');
+        document.getElementById('ev-hours').innerText = hours.toString().padStart(2, '0');
+        document.getElementById('ev-minutes').innerText = minutes.toString().padStart(2, '0');
+        document.getElementById('ev-seconds').innerText = seconds.toString().padStart(2, '0');
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+});
+</script>
 {% endblock %}

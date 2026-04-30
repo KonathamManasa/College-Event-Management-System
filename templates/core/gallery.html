@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Event Gallery - MRCEW Events Portal{% endblock %}
+
+{% block content %}
+<div class="row mb-4 align-items-center">
+    <div class="col-md-6">
+        <h1 class="display-6 fw-bold text-white mb-0"><i class="bi bi-images text-primary me-2"></i>Event Gallery</h1>
+        <p class="text-light mt-2">Memories from our college events.</p>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card glass-card mb-4 border-0">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label text-light">Year</label>
+                <select name="year" class="form-select bg-dark text-white border-secondary">
+                    <option value="">All Years</option>
+                    {% for y in years %}
+                        <option value="{{ y.year }}" {% if selected_year == y.year|stringformat:"i" %}selected{% endif %}>{{ y.year }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label text-light">Category</label>
+                <select name="category" class="form-select bg-dark text-white border-secondary">
+                    <option value="">All Categories</option>
+                    {% for c in categories %}
+                        <option value="{{ c }}" {% if selected_category == c %}selected{% endif %}>{{ c }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label text-light">Event Name</label>
+                <select name="event_name" class="form-select bg-dark text-white border-secondary">
+                    <option value="">All Events</option>
+                    {% for e in events %}
+                        <option value="{{ e.title }}" {% if selected_event == e.title %}selected{% endif %}>{{ e.title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Filter</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Photo Grid -->
+<div class="row g-4">
+    {% for photo in photos %}
+    <div class="col-md-4 col-lg-3">
+        <div class="card h-100 glass-card border-0 photo-card overflow-hidden">
+            <img src="{{ photo.image.url }}" class="card-img-top object-fit-cover" alt="{{ photo.event.title }}" style="height: 200px; transition: transform 0.3s ease;">
+            <div class="card-body p-3">
+                <h6 class="card-title text-white mb-1">{{ photo.event.title }}</h6>
+                {% if photo.caption %}
+                <p class="card-text text-light small mb-2">{{ photo.caption }}</p>
+                {% endif %}
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="badge bg-primary rounded-pill">{{ photo.event.category }}</span>
+                    <small class="text-secondary">{{ photo.event.date|date:"M Y" }}</small>
+                </div>
+                <a href="{{ photo.image.url }}" download class="btn btn-outline-light btn-sm w-100 mt-2 rounded-pill"><i class="bi bi-download me-2"></i>Download</a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center py-5">
+        <div class="glass-card p-5 border-0 rounded-4 d-inline-block">
+            <i class="bi bi-camera text-secondary display-1 mb-3"></i>
+            <h3 class="text-white">No photos found</h3>
+            <p class="text-light mb-0">Try adjusting your filters or check back later.</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<style>
+    .photo-card:hover img {
+        transform: scale(1.05);
+    }
+</style>
+{% endblock %}

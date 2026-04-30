@@ -38,7 +38,36 @@
                 <h4 class="fw-bold text-white mb-3">{{ event.title }}</h4>
                 <div class="text-secondary mb-2"><i class="bi bi-calendar3 me-2 text-primary"></i>{{ event.date }}</div>
                 <div class="text-secondary mb-2"><i class="bi bi-clock me-2 text-primary"></i>{{ event.start_time|time:"g:i A" }} - {{ event.end_time|time:"g:i A" }}</div>
-                <div class="text-secondary mb-4"><i class="bi bi-geo-alt me-2 text-primary"></i>{{ event.venue }}</div>
+                <div class="text-secondary mb-3"><i class="bi bi-geo-alt me-2 text-primary"></i>{{ event.venue }}</div>
+                
+                <div class="mb-3 event-countdown-list" data-countdown-date="{{ event.date|date:'Y-m-d' }}T{{ event.start_time|time:'H:i:s' }}">
+                    <div class="d-flex justify-content-start gap-2">
+                        <div class="text-center">
+                            <div class="bg-dark text-primary rounded px-2 py-1 border border-primary border-opacity-25 shadow-sm">
+                                <span class="fw-bold d-days">00</span>
+                            </div>
+                            <span class="text-secondary fw-bold text-uppercase d-block mt-1" style="font-size: 0.6rem;">Days</span>
+                        </div>
+                        <div class="text-center">
+                            <div class="bg-dark text-primary rounded px-2 py-1 border border-primary border-opacity-25 shadow-sm">
+                                <span class="fw-bold d-hours">00</span>
+                            </div>
+                            <span class="text-secondary fw-bold text-uppercase d-block mt-1" style="font-size: 0.6rem;">Hrs</span>
+                        </div>
+                        <div class="text-center">
+                            <div class="bg-dark text-primary rounded px-2 py-1 border border-primary border-opacity-25 shadow-sm">
+                                <span class="fw-bold d-minutes">00</span>
+                            </div>
+                            <span class="text-secondary fw-bold text-uppercase d-block mt-1" style="font-size: 0.6rem;">Mins</span>
+                        </div>
+                        <div class="text-center">
+                            <div class="bg-dark text-primary rounded px-2 py-1 border border-primary border-opacity-25 shadow-sm">
+                                <span class="fw-bold d-seconds">00</span>
+                            </div>
+                            <span class="text-secondary fw-bold text-uppercase d-block mt-1" style="font-size: 0.6rem;">Secs</span>
+                        </div>
+                    </div>
+                </div>
                 
                 <div class="mt-auto pt-3 border-top border-secondary border-opacity-25">
                     <a href="{% url 'event_detail' event.pk %}" class="btn btn-outline-primary w-100 rounded-pill">View Details</a>
@@ -54,4 +83,42 @@
     </div>
     {% endfor %}
 </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const timers = document.querySelectorAll('.event-countdown-list');
+    
+    function updateCountdowns() {
+        const now = new Date().getTime();
+        
+        timers.forEach(timer => {
+            const targetDateStr = timer.getAttribute('data-countdown-date');
+            const targetDate = new Date(targetDateStr).getTime();
+            const distance = targetDate - now;
+            
+            if (distance < 0) {
+                timer.innerHTML = '<div class="text-success small fw-bold px-2 py-1 bg-success bg-opacity-10 border border-success border-opacity-25 rounded d-inline-block"><i class="bi bi-check-circle-fill me-1"></i>Already Started</div>';
+                return;
+            }
+            
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            
+            const daysEl = timer.querySelector('.d-days');
+            if (daysEl) {
+                daysEl.innerText = days.toString().padStart(2, '0');
+                timer.querySelector('.d-hours').innerText = hours.toString().padStart(2, '0');
+                timer.querySelector('.d-minutes').innerText = minutes.toString().padStart(2, '0');
+                timer.querySelector('.d-seconds').innerText = seconds.toString().padStart(2, '0');
+            }
+        });
+    }
+    
+    updateCountdowns();
+    setInterval(updateCountdowns, 1000);
+});
+</script>
 {% endblock %}

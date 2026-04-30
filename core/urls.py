@@ -43,4 +43,9 @@ urlpatterns = [
     path('portal-admin/users/<int:user_id>/toggle/', views.toggle_user_status, name='toggle_user_status'),
     path('portal-admin/users/<int:user_id>/role/', views.change_user_role, name='change_user_role'),
     path('portal-admin/events/', views.admin_events, name='admin_events'),
+    
+    # Gallery URLs
+    path('gallery/', views.event_gallery, name='event_gallery'),
+    path('events/<int:event_id>/upload-photo/', views.upload_photo, name='upload_photo'),
+    path('events/<int:event_id>/download-album/', views.download_album, name='download_album'),
 ]
